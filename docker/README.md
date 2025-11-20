@@ -40,3 +40,24 @@ The installer writes `config.php` to the bind mount and initializes the DB. For 
 - Stop: `docker compose -f docker/docker-compose.yaml down`
 - Logs: `docker compose -f docker/docker-compose.yaml logs -f app`
 - Rebuild app image: `docker compose -f docker/docker-compose.yaml build --no-cache app`
+
+## Fresh install checklist
+
+If you need to reinstall or run the installer from scratch, do these steps in order:
+
+1) Clear config and restart app (re-enable installer)
+```bash
+cd docker
+Set-Content .\runtime\config\config.php ""
+docker compose -f docker-compose.yaml restart app
+```
+2) Reset database to empty
+```bash
+docker compose -f docker-compose.yaml exec db mysql -uroot -proot -e "DROP DATABASE IF EXISTS gibbon; CREATE DATABASE gibbon CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci; GRANT ALL PRIVILEGES ON gibbon.* TO 'gibbon'@'%'; FLUSH PRIVILEGES;"
+```
+3) Open the installer
+   - Visit `http://localhost:8080/` (auto-redirect to installer)
+   - Database: host `db`, port `3306`, name/user/password `gibbon`
+   - Set admin username/password
+   - Choose Demo Data = yes (for quick trial) or no (for real use)
+4) After install finishes, `config.php` is written to `docker/runtime/config/config.php` and DB data lives in `docker/runtime/mysql/`.
