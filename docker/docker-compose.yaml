@@ -1,0 +1,48 @@
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: gibbon/app:local
+    container_name: gibbon-app
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "8080:80"
+    environment:
+      TZ: UTC
+    volumes:
+      - ../uploads:/var/www/html/uploads
+      - ../resources/assets/compiled:/var/www/html/resources/assets/compiled
+      - ./runtime/config/config.php:/var/www/html/config.php
+      - ./runtime/apache-logs:/var/log/apache2
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: gibbon-db
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: gibbon
+      MYSQL_USER: gibbon
+      MYSQL_PASSWORD: gibbon
+    volumes:
+      - ./runtime/mysql:/var/lib/mysql
+      - ../gibbon.sql:/docker-entrypoint-initdb.d/01-gibbon.sql:ro
+    ports:
+      - "3306:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 30s
+    restart: unless-stopped
