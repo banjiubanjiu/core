@@ -59,6 +59,11 @@ COPY --chown=www-data:www-data . /var/www/html
 COPY --from=vendor /app/vendor /var/www/html/vendor
 
 RUN set -eux; \
+    sed -i 's/^# *\\(zh_CN.UTF-8\\)/\\1/' /etc/locale.gen; \
+    sed -i 's/^# *\\(zh_HK.UTF-8\\)/\\1/' /etc/locale.gen; \
+    sed -i 's/^# *\\(en_US.UTF-8\\)/\\1/' /etc/locale.gen; \
+    locale-gen zh_CN.UTF-8 zh_HK.UTF-8 en_US.UTF-8; \
+    update-locale LANG=zh_CN.UTF-8; \
     mkdir -p resources/assets/compiled uploads; \
     touch config.php; \
     chown -R www-data:www-data resources/assets/compiled uploads config.php

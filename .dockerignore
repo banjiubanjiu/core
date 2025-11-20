@@ -1,0 +1,8 @@
+docker/runtime/mysql
+docker/runtime/apache-logs
+docker/runtime/config/config.php
+uploads
+resources/assets/compiled
+.git
+.gitmodules
+.gitignore
